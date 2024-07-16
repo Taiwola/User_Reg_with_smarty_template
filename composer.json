@@ -1,4 +1,7 @@
 {
+    "name": "user/auth",
+    "description": "simple user registration",
+    "license": "MIT",
     "require": {
         "smarty/smarty": "^5.3"
     }
