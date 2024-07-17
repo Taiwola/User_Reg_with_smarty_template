@@ -2,8 +2,12 @@
 // Including Composer autoload and UserRegistration class
 require './vendor/autoload.php';
 require './model/user.class.php';
+@include './connection/conn.php';
 
 use Smarty\Smarty; // Importing Smarty namespace
+
+
+
 
 // Handling POST request for form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
 
     // Creating UserRegistration object with provided data
-    $userRegistration = new UserRegistration($username, $email, $password);
+    $userRegistration = new UserRegistration($username, $email, $password, $conn);
 
     // Initializing Smarty template engine
     $smarty = new Smarty();

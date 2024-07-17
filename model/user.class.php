@@ -1,6 +1,7 @@
 <?php
 class UserRegistration
 {
+    private $conn;
     private $username;
     private $email;
     private $password;
@@ -12,12 +13,14 @@ class UserRegistration
      * @param string $username
      * @param string $email
      * @param string $password
+     * @param $conn connection string
      */
-    public function __construct($username, $email, $password)
+    public function __construct($username, $email, $password, $conn)
     {
         $this->username = $username;
         $this->email = $email;
         $this->password = $password;
+        $this->conn = $conn;
     }
 
     /**
@@ -55,15 +58,52 @@ class UserRegistration
     }
 
     /**
-     * Placeholder method to save user data (typically would save to a database).
+     * Saves the user data to the database.
      *
-     * @return bool Always returns true for simplicity.
+     * @return bool Returns true on success, false on failure.
      */
     public function save()
     {
-        // Here you would typically save the user data to a database
-        // For simplicity, we will just return true
-        return true;
+
+        if (!$this->validate()) {
+            return false;
+        }
+
+        $userexist_query = "SELECT * FROM user WHERE username='$this->username'";
+        $result = mysqli_query($this->conn, $userexist_query);
+        $rows_count = mysqli_num_rows($result);
+
+        if ($rows_count > 0) {
+            $this->errors['username'] = 'username already in use';
+            return false;
+        }
+
+        $emailexist_query = "SELECT * FROM user WHERE email='$this->email'";
+        $email_result = mysqli_query($this->conn, $emailexist_query);
+        $email_rows_count = mysqli_num_rows($email_result);
+
+        if ($email_rows_count > 0) {
+            $this->errors['email'] = 'email already exist';
+            return false;
+        }
+
+        // hash password
+        $hash_pwd = password_hash($this->password, PASSWORD_BCRYPT);
+
+        $username = $this->username;
+        $email = $this->email;
+
+        $insert_query = "INSERT INTO user (username, email, password) VALUES ('$username', '$email', '$hash_pwd')";
+
+
+        $sql_execute = mysqli_query($this->conn, $insert_query);
+
+        if ($sql_execute) {
+            return true;
+        } else {
+            $this->errors['db'] = "Something went wrong, try later";
+            return false;
+        }
     }
 
     /**
